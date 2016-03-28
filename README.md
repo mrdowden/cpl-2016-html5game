@@ -1,5 +1,7 @@
 # Building HTML5 Games: How to be a 2-figure Developer
 
+Session from Code PaLOUsa 2016
+
 GitHub: https://github.com/TwoScoopGames/building-html5-games
 Slides: http://ericlathrop.com/making-javascript-games/
 Made by [Two Scoop Games](http://twoscoopgames.com).
