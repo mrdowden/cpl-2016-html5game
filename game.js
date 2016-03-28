@@ -24,7 +24,7 @@ window.addEventListener("keyup", function(e) {
    pressed[keys[e.keyCode]] = false; 
 });
 
-var player = { x: 50, y: 50, speed: 0.5, friction: 0.9 };
+var player = { x: 50, y: 500, speed: 0.5, friction: 0.9 };
 
 var animations = {
     ship: {
@@ -42,10 +42,19 @@ var animations = {
         frameWidth: 55 / 5,
         time: 0,
         speed: 100
+    },
+    meteor: {
+        image: new Image(),
+        frame: 0,
+        frames: 4,
+        frameWidth: 320 / 4,
+        time: 0,
+        speed: 300
     }
 };
 animations.ship.image.src = "images/ship-f3.png";
 animations.bullet.image.src = "images/bullet-f5.png";
+animations.meteor.image.src = "images/meteor-f4.png";
 
 var advanceAnimations = function(elapsed) {
     Object.keys(animations).forEach(function(name) {
@@ -67,6 +76,7 @@ var drawAnimation = function(context, name, x, y) {
 }
 
 var bullets = [];
+var meteors = [];
 var lastFrameTime = null;
 
 var render = function(time) {
@@ -77,6 +87,14 @@ var render = function(time) {
     lastFrameTime = time;
     
     advanceAnimations(elapsed);
+    
+    //Spawn Meteors
+    while (meteors.length < 1) {
+        meteors.push({
+            x: Math.floor(Math.random() * (canvas.width - animations.meteor.frameWidth)),
+            y: -animations.meteor.image.height
+        });
+    }
     
     var xspeed = 0, yspeed = 0;
     if(pressed["left"]) {
@@ -120,6 +138,15 @@ var render = function(time) {
         var bullet = bullets[i];
         drawAnimation(context, "bullet", bullet.x, bullet.y);
         bullet.y -= 1 * elapsed;
+    }
+    for(var i = 0; i < meteors.length; i++) {
+        var meteor = meteors[i];
+        drawAnimation(context, "meteor", meteor.x, meteor.y);
+        meteor.y += 1 * elapsed;
+        if(meteor.y > canvas.height) {
+            meteors.splice(i, 1);
+            i--;
+        }
     }
     //context.drawImage(ship, 0, 0, ship.width, ship.height, player.x, player.y, ship.width, ship.height);
     //context.fillRect(player.x, player.y, 50, 50);
