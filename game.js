@@ -74,6 +74,10 @@ var drawAnimation = function(context, name, x, y) {
     var anim = animations[name];
     context.drawImage(anim.image, anim.x, 0, anim.frameWidth, anim.image.height, x, y, anim.frameWidth, anim.image.height);
 }
+var overlaps = function(x1, y1, w1, h1, x2, y2, w2, h2) {
+  return x1 + w1 > x2 && x1 < x2 + w2 &&
+    y1 + h1 > y2 && y1 < y2 + h2;
+}
 
 var bullets = [];
 var meteors = [];
@@ -127,18 +131,32 @@ var render = function(time) {
     if(player.y < 0) player.y = 0;
     if(player.y + animations.ship.image.height > canvas.height) player.y = canvas.height - animations.ship.image.height;
     
-/*    context.fillStyle = colors[color];
-    color++;
-    if(color >= colors.length) {
-        color = 0;
-    }*/
+    //Clear screen
     context.clearRect(0, 0, canvas.width, canvas.height);
+    //Draw ship
     drawAnimation(context, "ship", player.x, player.y);
+    //Draw bullets
     for(var i = 0; i < bullets.length; i++) {
         var bullet = bullets[i];
         drawAnimation(context, "bullet", bullet.x, bullet.y);
         bullet.y -= 1 * elapsed;
+        //Remove off-screen bullets
+        if(bullet.y < -animations.bullet.image.height) {
+            bullets.splice(i, 1);
+            i--;
+            continue;
+        }
+        //Detect collisions
+        for(var j = 0; j < meteors.length; j++) {
+            var meteor = meteors[j];
+            if(overlaps(bullet.x, bullet.y, animations.bullet.frameWidth, animations.bullet.image.height, meteor.x, meteor.y, animations.meteor.frameWidth, animations.meteor.image.height)) {
+                bullets.splice(i, 1);
+                meteors.splice(j, 1);
+                j--; i--;
+            }
+        }
     }
+    //Draw meteors
     for(var i = 0; i < meteors.length; i++) {
         var meteor = meteors[i];
         drawAnimation(context, "meteor", meteor.x, meteor.y);
