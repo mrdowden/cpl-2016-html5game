@@ -24,6 +24,20 @@ window.addEventListener("keyup", function(e) {
    pressed[keys[e.keyCode]] = false; 
 });
 
+// Sounds
+var explode = new Audio();
+explode.src = "sounds/explode.wav";
+explode.load();
+
+var laser = new Audio();
+laser.src = "sounds/laser.wav";
+laser.load();
+
+var playSound = function(sound) {
+  var s = sound.cloneNode(true);
+  s.play();
+}
+
 var player = { x: 50, y: 500, speed: 0.5, friction: 0.9 };
 
 var animations = {
@@ -82,6 +96,13 @@ var overlaps = function(x1, y1, w1, h1, x2, y2, w2, h2) {
 var bullets = [];
 var meteors = [];
 var lastFrameTime = null;
+var fireTimerMax = 100;
+var fireTimer = fireTimerMax;
+var score = 0;
+var shotsFired = 0;
+var meteorsAvoided = 0;
+var gameOver = false;
+var startupDelay = 5000;
 
 var render = function(time) {
     if(lastFrameTime === null) {
@@ -91,33 +112,42 @@ var render = function(time) {
     lastFrameTime = time;
     
     advanceAnimations(elapsed);
+    fireTimer += elapsed;
     
-    //Spawn Meteors
-    while (meteors.length < 1) {
-        meteors.push({
-            x: Math.floor(Math.random() * (canvas.width - animations.meteor.frameWidth)),
-            y: -animations.meteor.image.height
-        });
-    }
-    
-    var xspeed = 0, yspeed = 0;
-    if(pressed["left"]) {
-        xspeed = -player.speed;
-    }
-    if(pressed["right"]) {
-        xspeed = player.speed;
-    }
-    if(pressed["up"]) {
-        yspeed = -player.speed;
-    }
-    if(pressed["down"]) {
-        yspeed = player.speed;
-    }
-    if(pressed["space"]) {
-        bullets.push({
-            x: player.x + (animations.ship.frameWidth / 2) - (animations.bullet.frameWidth / 2),
-            y: player.y - animations.bullet.image.height
-        });
+    if(!gameOver) {
+        //Spawn Meteors
+        if(time > startupDelay) {
+            while (meteors.length < 3) {
+                meteors.push({
+                    x: Math.floor(Math.random() * (canvas.width - animations.meteor.frameWidth)),
+                    y: -animations.meteor.image.height - Math.floor(Math.random() * 300),
+              speed: 0.3 + Math.random()
+                });
+            }
+        }
+        
+        var xspeed = 0, yspeed = 0;
+        if(pressed["left"]) {
+            xspeed = -player.speed;
+        }
+        if(pressed["right"]) { 
+            xspeed = player.speed;
+        }
+        if(pressed["up"]) {
+            yspeed = -player.speed;
+        }
+        if(pressed["down"]) {
+            yspeed = player.speed;
+        }
+        if(pressed["space"] && fireTimer > fireTimerMax) {
+            playSound(laser);
+            fireTimer = 0;
+            bullets.push({
+                x: player.x + (animations.ship.frameWidth / 2) - (animations.bullet.frameWidth / 2),
+                y: player.y - animations.bullet.image.height
+            });
+            shotsFired++;
+        }
     }
     
     //xspeed *= player.friction;
@@ -134,7 +164,9 @@ var render = function(time) {
     //Clear screen
     context.clearRect(0, 0, canvas.width, canvas.height);
     //Draw ship
-    drawAnimation(context, "ship", player.x, player.y);
+    if(!gameOver) {
+        drawAnimation(context, "ship", player.x, player.y);
+    }
     //Draw bullets
     for(var i = 0; i < bullets.length; i++) {
         var bullet = bullets[i];
@@ -150,6 +182,8 @@ var render = function(time) {
         for(var j = 0; j < meteors.length; j++) {
             var meteor = meteors[j];
             if(overlaps(bullet.x, bullet.y, animations.bullet.frameWidth, animations.bullet.image.height, meteor.x, meteor.y, animations.meteor.frameWidth, animations.meteor.image.height)) {
+                playSound(explode);
+                score++;
                 bullets.splice(i, 1);
                 meteors.splice(j, 1);
                 j--; i--;
@@ -162,12 +196,27 @@ var render = function(time) {
         drawAnimation(context, "meteor", meteor.x, meteor.y);
         meteor.y += 1 * elapsed;
         if(meteor.y > canvas.height) {
+            meteorsAvoided++;
             meteors.splice(i, 1);
             i--;
         }
+        if (!gameOver && overlaps(player.x, player.y, animations.ship.frameWidth, animations.ship.image.height, meteor.x, meteor.y, animations.meteor.frameWidth, animations.meteor.image.height)) {
+          gameOver = true;
+          playSound(explode);
+        }
     }
-    //context.drawImage(ship, 0, 0, ship.width, ship.height, player.x, player.y, ship.width, ship.height);
-    //context.fillRect(player.x, player.y, 50, 50);
+    
+    context.fillStyle = "#fff";
+    context.font = "25px helvetica";
+    context.fillText("SCORE: " + Math.max(0, score*10-shotsFired+meteorsAvoided), 50, 50);
+    context.fillText("FIRED: " + shotsFired, 50, 75);
+    context.fillText("AVOIDED: " + meteorsAvoided, 50, 100);
+     
+    if (gameOver) {
+        context.fillStyle = "#fff";
+        context.fillText("GAME OVER", 300, 300);
+    }
+     
     window.requestAnimationFrame(render);
 }
 window.requestAnimationFrame(render);

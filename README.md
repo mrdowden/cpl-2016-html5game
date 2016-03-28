@@ -4,6 +4,8 @@ GitHub: https://github.com/TwoScoopGames/building-html5-games
 Slides: http://ericlathrop.com/making-javascript-games/
 Made by [Two Scoop Games](http://twoscoopgames.com).
 
+Use bfxr to create sound effects
+
 ## Intro to HTML5 Canvas
 //Draw a red square on the canvas
 var canvas = document.getElementById("canvas");
