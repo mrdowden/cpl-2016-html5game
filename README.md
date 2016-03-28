@@ -2,13 +2,14 @@
 
 Session from Code PaLOUsa 2016
 
-GitHub: https://github.com/TwoScoopGames/building-html5-games
-Slides: http://ericlathrop.com/making-javascript-games/
+GitHub: https://github.com/TwoScoopGames/building-html5-games    
+Slides: http://ericlathrop.com/making-javascript-games/    
 Made by [Two Scoop Games](http://twoscoopgames.com).
 
 Use bfxr to create sound effects
 
 ## Intro to HTML5 Canvas
+```javascript
 //Draw a red square on the canvas
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -66,3 +67,4 @@ window.addEventListener("keydown", function(e) {
 window.addEventListener("keyup", function(e) {
     keys[keyMap[e.keyCode]] = false;
 });
+```
