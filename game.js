@@ -28,6 +28,7 @@ ship.src = "images/ship-f3.png";
 
 var player = { x: 50, y: 50, speed: 0.5, friction: 0.9 };
 
+
 var lastFrameTime = null;
 
 var render = function(time) {
@@ -62,13 +63,14 @@ var render = function(time) {
     if(player.y < 0) player.y = 0;
     if(player.y + 50 > canvas.height) player.y = canvas.height - 50;
     
-    context.fillStyle = colors[color];
+/*    context.fillStyle = colors[color];
     color++;
     if(color >= colors.length) {
         color = 0;
-    }
+    }*/
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillRect(player.x, player.y, 50, 50);
+    context.drawImage(ship, 0, 0, ship.width, ship.height, player.x, player.y, ship.width, ship.height);
+    //context.fillRect(player.x, player.y, 50, 50);
     window.requestAnimationFrame(render);
 }
 window.requestAnimationFrame(render);
